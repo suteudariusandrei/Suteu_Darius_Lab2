@@ -11,7 +11,7 @@ using Suteu_Darius_Lab2.Models;
 
 namespace Suteu_Darius_Lab2.Pages.Books
 {
-    public class EditModel : PageModel
+    public class EditModel : BookCategoriesPageModel
     {
         private readonly Suteu_Darius_Lab2.Data.Suteu_Darius_Lab2Context _context;
 
@@ -31,60 +31,63 @@ namespace Suteu_Darius_Lab2.Pages.Books
             }
 
             Book = await _context.Book
-                .Include(b => b.Author)   // Include the Author entity
-                .Include(b => b.Publisher) // Include the Publisher entity
+                .Include(b => b.Author)   
+                .Include(b => b.Publisher)
+                .Include(b => b.BookCategories).ThenInclude(b => b.Category)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ID == id);
 
             if (Book == null)
             {
                 return NotFound();
             }
+            PopulateAssignedCategoryData(_context, Book);
 
-            // Populate the ViewBag with authors and concatenate FirstName + LastName
-            ViewData["AuthorID"] = new SelectList(_context.Authors.Select(a => new {
-                a.ID,
-                FullName = a.FirstName + " " + a.LastName // Concatenating FirstName and LastName
-            }), "ID", "FullName", Book.AuthorID);
-
-            // Populate the ViewBag with publishers
-            ViewData["PublisherID"] = new SelectList(_context.Set<Publisher>(), "ID", "PublisherName", Book.PublisherID);
-
+            var authorList = _context.Authors.Select(x => new
+            {
+                x.ID,
+                FullName = x.LastName + " " + x.FirstName
+            });
+            ViewData["AuthorID"] = new SelectList(authorList, "ID", "FullName");
+            ViewData["PublisherID"] = new SelectList(_context.Publisher, "ID",
+           "PublisherName");
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(int? id, string[]
+       selectedCategories)
         {
-            if (!ModelState.IsValid)
+            if (id == null)
             {
-                return Page();
+                return NotFound();
             }
-
-            _context.Attach(Book).State = EntityState.Modified;
-
-            try
+            //se va include Author conform cu sarcina de la lab 2
+            var bookToUpdate = await _context.Book
+            .Include(i => i.Publisher)
+             .Include(i => i.Author)
+            .Include(i => i.BookCategories)
+            .ThenInclude(i => i.Category)
+            .FirstOrDefaultAsync(s => s.ID == id);
+            if (bookToUpdate == null)
             {
+                return NotFound();
+            }
+            //se va modifica AuthorID conform cu sarcina de la lab 2
+            if (await TryUpdateModelAsync<Book>(
+            bookToUpdate,
+            "Book",
+            i => i.Title, i => i.Author,
+            i => i.Price, i => i.PublishingDate, i => i.PublisherID))
+            {
+                UpdateBookCategories(_context, selectedCategories, bookToUpdate);
                 await _context.SaveChangesAsync();
+                return RedirectToPage("./Index");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BookExists(Book.ID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return RedirectToPage("./Index");
-        }
-
-        private bool BookExists(int id)
-        {
-            return _context.Book.Any(e => e.ID == id);
+            //Apelam UpdateBookCategories pentru a aplica informatiile din checkboxuri la entitatea Books care
+            //este editata
+            UpdateBookCategories(_context, selectedCategories, bookToUpdate);
+            PopulateAssignedCategoryData(_context, bookToUpdate);
+            return Page();
         }
     }
 }

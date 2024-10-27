@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;  // For SelectList
+using Microsoft.AspNetCore.Mvc.Rendering;  
 using Microsoft.EntityFrameworkCore;
 using Suteu_Darius_Lab2.Data;
 using Suteu_Darius_Lab2.Models;
@@ -21,34 +21,38 @@ namespace Suteu_Darius_Lab2.Pages.Books
         }
 
         public IList<Book> Book { get; set; } = default!;
+        public BookData BookD { get; set; }
+        public int BookID { get; set; }
+        public int CategoryID { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public int? AuthorID { get; set; } // For filtering by author
+        public int? AuthorID { get; set; }
 
-        public async Task OnGetAsync()
+        public async Task OnGetAsync(int? id, int? categoryID)
         {
-            // Populate the list of authors for the dropdown with concatenated FirstName and LastName
-            ViewData["AuthorID"] = new SelectList(
-                await _context.Authors.Select(a => new
-                {
-                    a.ID,
-                    FullName = a.FirstName + " " + a.LastName // Concatenating FirstName and LastName
-                }).ToListAsync(), "ID", "FullName");
-
-            // Fetch books and include authors and publishers
-            var booksQuery = _context.Book
-                .Include(b => b.Author)
-                .Include(b => b.Publisher)
-                .AsQueryable();
-
-            // If an author is selected, filter books by that author
-            if (AuthorID.HasValue)
+            BookD = new BookData();
+            ViewData["Author"] = new SelectList(
+            await _context.Authors.Select(a => new
             {
-                booksQuery = booksQuery.Where(b => b.AuthorID == AuthorID.Value);
-            }
+                a.ID,
+                FullName = a.FirstName + " " + a.LastName
+            }).ToListAsync(), "ID", "FullName");
 
-            // Execute the query and get the list of books
-            Book = await booksQuery.ToListAsync();
+            BookD.Books = await _context.Book
+ .Include(b => b.Publisher)
+ .Include(b => b.Author)
+ .Include(b => b.BookCategories)
+ .ThenInclude(b => b.Category)
+ .AsNoTracking()
+ .OrderBy(b => b.Title)
+ .ToListAsync();
+            if (id != null)
+            {
+                BookID = id.Value;
+                Book book = BookD.Books
+                .Where(i => i.ID == id.Value).Single();
+                BookD.Categories = book.BookCategories.Select(s => s.Category);
+            }
         }
     }
 }
