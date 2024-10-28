@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Suteu_Darius_Lab2.Data;
 using Suteu_Darius_Lab2.Models;
+using Suteu_Darius_Lab2.ViewModels;
 
 namespace Suteu_Darius_Lab2.Pages.Publishers
 {

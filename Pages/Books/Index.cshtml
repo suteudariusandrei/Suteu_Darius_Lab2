@@ -6,26 +6,46 @@
 }
 
 <h1>Index</h1>
-<form method="get">
-    <div class="form-group">
-        <label for="AuthorID">Select Author:</label>
-        <select id="AuthorID" name="AuthorID" class="form-control" asp-items="ViewBag.AuthorID"></select>
-    </div>
-    <button type="submit" class="btn btn-primary">Filter</button>
-</form>
 
 <p>
     <a asp-page="Create">Create New</a>
 </p>
+<form asp-page="./Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by Book Title / Author Name:
+            <input type="text" name="SearchString" value="@Model.CurrentFilter" />
+            <input type="submit" value="Search" class="btn btn-primary" /> |
+            <a asp-page="./Index">Back to full List</a>
+        </p>
+    </div>
+</form>
 <table class="table">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(model => model.BookD.Books.FirstOrDefault().Title)</th>
-            <th>@Html.DisplayNameFor(model => model.BookD.Books.FirstOrDefault().Price)</th>
-            <th>@Html.DisplayNameFor(model => model.BookD.Books.FirstOrDefault().PublishingDate)</th>
-            <th>@Html.DisplayNameFor(model => model.BookD.Books.FirstOrDefault().Publisher.PublisherName)</th>
-            <th>Author Name</th>
-            <th>Categories</th>
+            >
+            <th>
+                <a asp-page="./Index" asp-route-sortOrder="@Model.TitleSort">
+                    @Html.DisplayNameFor(model => model.Book[0].Title)
+                </a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Book[0].Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Book[0].PublishingDate)
+            </th>
+            <th colspan="2">
+                <a asp-page="./Index" asp-route-sortOrder="@Model.AuthorSort">
+                    @Html.DisplayNameFor(model => model.Book[0].Author)
+                </a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Book[0].Publisher)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Book[0].BookCategories)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -38,14 +58,13 @@
                 <td>@Html.DisplayFor(modelItem => item.Title)</td>
                 <td>@Html.DisplayFor(modelItem => item.Price)</td>
                 <td>@Html.DisplayFor(modelItem => item.PublishingDate)</td>
-                <td>@Html.DisplayFor(modelItem => item.Publisher.PublisherName)</td>
-                <td>@Html.DisplayFor(modelItem => item.Author.FirstName) @Html.DisplayFor(modelItem => item.Author.LastName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Author.FullName)</td>
+                <td>@Html.DisplayFor(modelItem => item.Publisher.PublisherName)</td>   
                 <td>
                     @foreach (var category in item.BookCategories)
                     {
                         <span>@category.Category.CategoryName</span>
 
-                        <br />
                     }
                 </td>
                 <td>
