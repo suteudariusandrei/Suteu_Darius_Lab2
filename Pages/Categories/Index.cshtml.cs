@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Suteu_Darius_Lab2.Data;
 using Suteu_Darius_Lab2.Models;
+using Suteu_Darius_Lab2.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Suteu_Darius_Lab2.Pages.Categories
 {
@@ -16,11 +18,37 @@ namespace Suteu_Darius_Lab2.Pages.Categories
             _context = context;
         }
 
-        public IList<Category> Categories { get; set; } = new List<Category>();
+        // Proprietate pentru a reține lista de categorii
+        public IEnumerable<Category> Category { get; set; }  // Folosim `Category` la singular, conform contextului
 
-        public async Task OnGetAsync()
+        // ViewModel pentru a gestiona datele afișate pe pagină
+        public CategoryIndexData CategoryData { get; set; } = new CategoryIndexData();
+
+        // ID-ul categoriei selectate
+        public int CategoryID { get; set; }
+
+        public async Task OnGetAsync(int? id)
         {
-            Categories = await _context.Category.ToListAsync();
+            CategoryData = new CategoryIndexData();
+            Category = await _context.Category  // Folosim `_context.Category` pentru a accesa tabelele
+                .Include(c => c.BookCategories)
+                    .ThenInclude(bc => bc.Book)
+                .OrderBy(c => c.CategoryName)
+                .ToListAsync();
+
+            if (id != null)
+            {
+                CategoryID = id.Value;
+                var selectedCategory = Category
+                    .SingleOrDefault(c => c.ID == id.Value);
+
+                if (selectedCategory != null)
+                {
+                    CategoryData.Books = selectedCategory.BookCategories
+                        .Select(bc => bc.Book)
+                        .ToList();
+                }
+            }
         }
     }
 }

@@ -6,6 +6,17 @@
 }
 
 <h1>Index</h1>
+<style>
+    .table th, .table td {
+        text-align: center; 
+        vertical-align: middle;
+    }
+
+    .table .table-success {
+        background-color: #dff0d8; 
+    }
+</style>
+
 
 <p>
     <a asp-page="Create">Create New</a>
@@ -23,7 +34,6 @@
 <table class="table">
     <thead>
         <tr>
-            >
             <th>
                 <a asp-page="./Index" asp-route-sortOrder="@Model.TitleSort">
                     @Html.DisplayNameFor(model => model.Book[0].Title)
@@ -35,7 +45,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Book[0].PublishingDate)
             </th>
-            <th colspan="2">
+            <th>
                 <a asp-page="./Index" asp-route-sortOrder="@Model.AuthorSort">
                     @Html.DisplayNameFor(model => model.Book[0].Author)
                 </a>

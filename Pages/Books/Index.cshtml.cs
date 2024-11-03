@@ -39,6 +39,7 @@ searchString)
             AuthorSort = sortOrder == "author" ? "author_desc" : "author";
             CurrentFilter = searchString;
 
+
             BookD.Books = await _context.Book
             .Include(b => b.Author)
            .Include(b => b.Publisher)
