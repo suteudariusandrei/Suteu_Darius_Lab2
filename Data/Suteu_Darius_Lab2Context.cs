@@ -20,5 +20,7 @@ namespace Suteu_Darius_Lab2.Data
         public DbSet<Suteu_Darius_Lab2.Models.Category> Category { get; set; } = default!;
         public DbSet<Suteu_Darius_Lab2.Models.Member> Member { get; set; } = default!;
         public DbSet<Suteu_Darius_Lab2.Models.Borrowing> Borrowing { get; set; } = default!;
+        public DbSet<Member> Members { get; set; }
+
     }
 }

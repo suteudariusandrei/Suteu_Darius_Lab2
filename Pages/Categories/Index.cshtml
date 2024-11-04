@@ -23,7 +23,7 @@
             @foreach (var item in Model.Category)
             {
                 string selectedRow = item.ID == Model.CategoryID ? "table-success" : "";
-                <!-- Evidențiază categoria selectată -->
+                
 
                 <tr class="@selectedRow">
                     <td>
@@ -55,7 +55,7 @@
             {
                 <tr>
                     <td>@book.Title</td>
-                    <td>@book.Author?.FullName</td> <!-- Verificăm și `Author` pentru a evita alte erori `null` -->
+                    <td>@book.Author?.FullName</td> 
                 </tr>
             }
         </tbody>
